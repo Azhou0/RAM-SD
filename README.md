@@ -30,7 +30,7 @@
 <p>
   <a href="#installation">Quick Start</a> &nbsp;&middot;&nbsp;
   <a href="docs/DATASETS.md">Datasets</a> &nbsp;&middot;&nbsp;
-  <a href="docs/PAPER_ALIGNMENT.md">Reproducibility</a> &nbsp;&middot;&nbsp;
+  <a href="#run-an-experiment">Experiments</a> &nbsp;&middot;&nbsp;
   <a href="#citation">Citation</a>
 </p>
 
@@ -51,9 +51,7 @@ RAM-SD combines balanced example retrieval, rationale generation, adaptive meta-
 
 - **Balanced contextual retrieval:** ground each query in sarcastic and non-sarcastic training examples with explanatory rationales.
 - **Adaptive reasoning:** select expectation-violation, knowledge-dependent, or simple-irony plans for different inputs.
-- **Interpretable execution:** retain specialist outputs, final explanations, configuration hashes, and recorded responses for replay.
-
-> **Reproduction status:** this release reconstructs the method from the authors' original local code and published prompts. It has passed 40 offline tests and a three-sample live integration check. Complete benchmark scores, original processed splits, the historical model snapshot, and three-run retrieval ordering have not been recovered. See [Paper alignment](docs/PAPER_ALIGNMENT.md) and [Validation](docs/VALIDATION.md).
+- **Interpretable reasoning:** combine specialist evidence into a final judgment with a natural-language explanation.
 
 ## Method
 
@@ -72,15 +70,13 @@ Use Python 3.12 and [uv](https://docs.astral.sh/uv/):
 git clone https://github.com/Azhou0/RAM-SD.git
 cd RAM-SD
 uv sync --frozen --no-editable
-uv run --frozen --no-editable ram-sd --help
-uv run --frozen --no-editable python -m unittest discover -s tests -v
 ```
 
-`uv.lock` pins runtime dependencies. Non-editable installation avoids reliance on editable path hooks. Reinstall after changing source files; during development, use `PYTHONPATH=src` to test the source tree explicitly. Without uv, create a Python 3.12 environment, install `requirements.lock.txt`, then run `python -m pip install --no-deps .`.
+Dependencies are pinned in `uv.lock`. For pip installation, install `requirements.lock.txt`, then run `python -m pip install --no-deps .`.
 
 ## Datasets
 
-Datasets are distributed by their original providers and are not included here. See [Dataset sources and formats](docs/DATASETS.md) for official links and conversion commands.
+Download the benchmarks from their [official sources](docs/DATASETS.md) and organize the CSV files as follows:
 
 ```text
 data/
@@ -90,28 +86,39 @@ data/
   mustard/test.csv    # train.csv is optional; no retrieval
 ```
 
-CSV files require `Text,Label`, with `0` for non-sarcastic and `1` for sarcastic. MUSTARD also requires a nonempty `Context` column. An optional `row_id` column supplies stable, unique IDs.
+Each CSV requires `Text,Label`, where `0` denotes non-sarcastic and `1` denotes sarcastic. MUSTARD also requires a nonempty `Context` column. An optional `row_id` column provides unique sample IDs. Format-conversion instructions are available in the [dataset guide](docs/DATASETS.md).
 
-Audit the inputs before running:
+Check the input files with:
 
 ```bash
 uv run --frozen --no-editable ram-sd audit-data \
-  --dataset iacv1 --data-dir data --output outputs/iacv1_data_audit.json
+  --dataset iacv1 --data-dir data
 ```
 
-Add `--strict-counts` to require the sample counts in Table 1. Matching counts do not establish that a split is the paper's original split. The program never silently removes rows or creates a new split to match those counts.
+Add `--strict-counts` to check dataset sizes against Table 1.
 
-## API configuration
+## Experimental configuration
 
-Set `OPENAI_API_KEY` in your shell, or create a local `.env` using [.env.example](.env.example) and pass `--env-file .env`. On Unix, restrict its permissions with `chmod 600 .env`.
+Create a local `.env` using [.env.example](.env.example) and set `OPENAI_API_KEY`.
 
-Optional variables are `RAM_SD_API_KEY`, `RAM_SD_BASE_URL`, `RAM_SD_EMBEDDING_API_KEY`, and `RAM_SD_EMBEDDING_BASE_URL`. Env-file loading is explicit, accepts only the documented variables, and performs no shell expansion or execution. Keys are never serialized into indexes or response records.
+| Parameter | Setting |
+|---|---|
+| Reasoning model | GPT-4o |
+| Temperature | 0.1 |
+| Top-p | 1.0 |
+| Maximum output tokens | 512 |
+| Generations per prompt | 1 |
+| Frequency / presence penalties | 0 / 0 |
+| Embedding model | text-embedding-3-large |
+| Embedding dimensions | 3072 |
+| Retrieved examples | 3 per label |
+| Similarity search | FAISS, cosine similarity after L2 normalization |
 
-The paper configurations use GPT-4o, temperature `0.1`, top_p `1`, max_tokens `512`, n `1`, zero penalties, and `text-embedding-3-large` embeddings with `3072` dimensions. The default retrieval setting is `k=3` per label.
+The default configuration is [configs/appendix.json](configs/appendix.json). [configs/maintext.json](configs/maintext.json) provides the separate probability-based Judger described in Section 3.4. Configuration details are documented in [Paper alignment](docs/PAPER_ALIGNMENT.md).
 
 ## Run an experiment
 
-Build the training-only index, then evaluate:
+Build a training-only retrieval index, then evaluate:
 
 ```bash
 uv run --frozen --no-editable ram-sd build-index \
@@ -123,86 +130,56 @@ uv run --frozen --no-editable ram-sd run \
   --env-file .env --mode live --out outputs/appendix/iacv1
 ```
 
-For MUSTARD, run `run --dataset mustard` directly and skip `build-index`. Use `--limit 2` for an initial interface check; the result is explicitly marked as a partial evaluation.
+Replace `iacv1` with `iacv2` or `semeval` for the other retrieval-based benchmarks. For MUSTARD, skip index construction and run:
 
-`--mode live` uses saved responses when available and sends new requests to the configured model service. `--mode replay` reads saved responses only and fails on a cache miss.
+```bash
+uv run --frozen --no-editable ram-sd run \
+  --config configs/appendix.json --dataset mustard --data-dir data \
+  --env-file .env --mode live --out outputs/appendix/mustard
+```
 
-Run all four datasets with the helper script:
+Run all four datasets with:
 
 ```bash
 bash scripts/run_main.sh /absolute/path/to/data appendix live outputs/main 0 .env
 ```
 
-The final two arguments are the retrieval insertion-order seed and the optional env-file path.
+The final two arguments are the retrieval insertion-order seed and the env-file path. Use `--limit N` for a subset of test samples or `--resume` to continue an existing run.
 
-## Implementation profiles
+## Outputs
 
-| Configuration | Basis | Final decision |
-|---|---|---|
-| `configs/appendix.json` (default) | Published Appendix E prompts, with the original code's Context helper | Integrator returns `label`, confidence in that label, and an explanation |
-| `configs/maintext.json` | Architecture in Sections 3.2-3.4 | A separate reconstructed Judger returns `p_sarcasm`; the label is `1` when the probability is at least `0.5` |
+Each output directory contains:
 
-The appendix's `conf` field is not treated as the probability of the positive class. The independent Judger prompt is not published in the paper and is explicitly marked as reconstructed. Planner rules, optional Semantic support, shared grounding, and helper-agent choices are documented in [Paper alignment](docs/PAPER_ALIGNMENT.md). Keep the profiles separate when reporting results.
+- `predictions.csv`: predictions, confidence, selected reasoning plans, and sample labels.
+- `metrics.json`: Accuracy, Precision, Recall, F1, Macro-F1, and the confusion matrix.
+- `traces/`: retrieved examples, agent analyses, and final explanations.
 
-## Outputs, resume, and replay
+To replay saved model responses, use the same configuration with `--mode replay` and a new output directory.
 
-Each evaluation writes:
+## Evaluation
 
-- `manifest.json`: code, configuration, runtime, data and index hashes, selected IDs, and provider endpoints.
-- `predictions.csv`: per-sample labels, predictions, confidence, selected plan, and execution status.
-- `metrics.json`: binary metrics, coverage, and request statistics.
-- `requests.json` and `traces/`: invocation metadata and per-sample reasoning traces.
+Use the same `--retrieval-order-seed` for index construction and evaluation. This controls per-label vector insertion order; MUSTARD does not use retrieval.
 
-Raw prompts and responses are stored under `.cache/responses/`. Data, outputs, caches, indexes, and credentials are excluded from version control and source releases.
-
-Use `--resume` with the same output directory to reuse verified successful traces. Changes to code, configuration, inputs, selected rows, runtime, provider, or index prevent resume. For a fresh replay, use `--mode replay --out outputs/replayed` with the original configuration and cache.
-
-Evaluation stops on the first failure by default. `--keep-going` collects additional failures. A run with failed or unattempted samples receives no aggregate score; failures never become default negative predictions. Truncated or malformed responses remain available for diagnosis. If replacing a saved invalid response, use a new cache and output directory and record the new generation.
-
-## Repeated runs and significance
-
-Pass the same `--retrieval-order-seed` to `build-index` and `run`. It changes per-label vector insertion order, without randomizing similarity ranks or replacing retrieved examples. The original three-run ordering procedure is unavailable; new seeds are explicit reproduction conditions, not recovered historical settings. Changing insertion order may have no effect when nearest neighbors have no boundary ties. MUSTARD has no retrieval-order variation.
+Aggregate compatible runs:
 
 ```bash
 uv run --frozen --no-editable ram-sd summarize \
   outputs/run0/iacv1/metrics.json outputs/run1/iacv1/metrics.json \
   --output outputs/summary.json
+```
 
+The summary reports means and sample standard deviations (`ddof=1`). When all four datasets are supplied, it also reports their unweighted mean.
+
+For a paired exact McNemar test against baseline predictions:
+
+```bash
 uv run --frozen --no-editable ram-sd compare \
   --predictions outputs/main/iacv1/predictions.csv \
   --baseline /path/to/baseline_predictions.csv \
   --output outputs/mcnemar.json
 ```
 
-Aggregation uses sample standard deviation (`ddof=1`) and reports an unweighted mean when all four datasets are present. Partial, failed, or duplicate replay runs cannot serve as repeated full evaluations. The paired test uses the exact two-sided conditional-binomial McNemar test and requires matching `row_id,label,prediction` records in the imported baseline file.
-
-## Small OpenAI integration check
-
-`configs/smoke_terra.json` is a separate integration-test configuration using `gpt-6.1-terra`. It retains temperature `0.1`, top_p `1`, and an output limit of `512`, while using the model's `max_completion_tokens` parameter and `reasoning_effort=none`. The GPT-4o paper configurations remain separate. See [OpenAI parameter compatibility](https://developers.openai.com/api/docs/guides/latest-model).
-
-```bash
-uv run --frozen --no-editable python scripts/smoke_openai.py \
-  --source-data-dir /path/to/local/legacy/datasets/sarcasm \
-  --env-file .env --mode live
-```
-
-This checks two IAC-V1 samples and one MUSTARD sample, using only eight IAC-V1 training examples per label for the temporary index. It is not a benchmark. The completed live check ran all three pipelines; two predictions agreed with the labels and one did not. Offline replay reproduced every recorded stage output with zero new API requests. See [Validation](docs/VALIDATION.md).
-
-## Repository layout
-
-```text
-src/ram_sd/          Pipeline, retrieval, API recording, evaluation, and CLI
-configs/            Paper profiles and a separate Terra smoke-test profile
-docs/               Dataset guide, paper alignment, and validation record
-scripts/            Batch execution, small integration check, and source packaging
-tests/              Offline tests with synthetic fixtures and mock HTTP
-references/         Source-file hashes and paper provenance
-assets/             High-resolution paper figure and attribution
-```
-
-The implemented scope covers the main method, format conversion, input audit, evaluation, replay, and aggregation. Baseline predictions can be imported for paired tests. Full baseline reruns, ablations, human explanation evaluation, and the paper's other supplementary experiments are outside the validated scope.
-
-Create a source archive with `uv run --frozen --no-editable python scripts/build_release.py`.
+The baseline CSV must contain matching `row_id,label,prediction` records.
 
 ## Citation
 
