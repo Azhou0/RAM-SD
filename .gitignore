@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.cache/
+artifacts/
+outputs/
+data/
+dist/
+references/paper-page-*.png
+references/paper.pdf
+references/paper.txt
+.DS_Store
+.env-*
+build/
+*.egg-info/

@@ -1,0 +1,31 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Install locked runtime dependencies
+        run: python -m pip install --require-hashes -r requirements.lock.txt
+      - name: Install the project
+        run: python -m pip install --no-deps .
+      - name: Run offline tests
+        run: python -m unittest discover -s tests -v
+      - name: Check command-line entry point
+        run: ram-sd --help
+      - name: Check batch script syntax
+        run: bash -n scripts/run_main.sh

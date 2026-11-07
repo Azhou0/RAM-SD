@@ -1,0 +1,18 @@
+{
+  "paper_url": "https://aclanthology.org/2026.acl-long.64.pdf",
+  "paper_sha256": "7e3e8c8d4c82a7322622d20b71121039f38048e6b4b1de1b3d69481d107c2e19",
+  "source_files": {
+    "README.md": "990b743746c4b5b7ac8b2037021521cd5cd60b15e06c29780a7d0ec317b6ed1c",
+    "LICENSE": "67a2ad3ab23a408ea8b9662944e7b412f11b7048c28d637baa8d524269ab539d",
+    "saracasm_metaplanner_v1.py": "196ba5ba24a776d8c5dbc6e65527a1347f080de7d51e22e347e7694dae4f3371",
+    "saracasm_metaplanner_v2.py": "55d4d7794da6280e014eb330e5c352ec027802cb9cf96af5480c8ceac6cfeedf",
+    "embedding_builder.py": "27ebb027ecaa302068843d9d90f71a42fad4b79627877d3f5a187b5ed9afb0ad",
+    "test_metaplanner_batch_v2.py": "898d64ba0dfbeb47e1d2a494ceedd975abd93b7c48fb2c72c55f1bf3fa13d64d",
+    "test_metaplanner_batch_v2_improved.py": "a88a6b89c2cf17f774cfe3c045d52470bc33d785b79c45085becb3330784572f"
+  },
+  "original_repository_modified": false,
+  "datasets_included": false,
+  "note": "Method reconstructed from authors local sources and Appendix E; historical run identity not recovered.",
+  "secrets_included_in_release": false,
+  "source_origin": "Authors' original local research implementation"
+}

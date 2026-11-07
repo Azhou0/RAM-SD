@@ -1,0 +1,17 @@
+[build-system]
+requires = ["hatchling>=1.25,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ram-sd-repro"
+version = "0.1.0"
+description = "Traceable reimplementation of RAM-SD (ACL 2026) from the authors' local code and paper"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+dependencies = ["openai>=1.40,<3", "numpy>=1.26,<3", "faiss-cpu>=1.8,<2"]
+
+[project.scripts]
+ram-sd = "ram_sd.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ram_sd"]
