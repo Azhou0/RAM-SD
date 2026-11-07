@@ -114,7 +114,7 @@ Create a local `.env` using [.env.example](.env.example) and set `OPENAI_API_KEY
 | Retrieved examples | 3 per label |
 | Similarity search | FAISS, cosine similarity after L2 normalization |
 
-The default configuration is [configs/appendix.json](configs/appendix.json). [configs/maintext.json](configs/maintext.json) provides the separate probability-based Judger described in Section 3.4. Configuration details are documented in [Paper alignment](docs/PAPER_ALIGNMENT.md).
+The default configuration is [configs/appendix.json](configs/appendix.json). [configs/maintext.json](configs/maintext.json) provides the separate probability-based Judger described in Section 3.4.
 
 ## Run an experiment
 

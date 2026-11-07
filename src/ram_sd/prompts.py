@@ -1,6 +1,6 @@
-"""Appendix E templates, with stable serialization and documented schema extensions.
+"""Prompt templates based on Appendix E of the RAM-SD paper.
 
-See docs/PAPER_ALIGNMENT.md for source locations and every operational adaptation.
+Source: https://aclanthology.org/2026.acl-long.64.pdf
 """
 
 from string import Template
