@@ -1,14 +1,59 @@
-# RAM-SD
+<div align="center">
 
-## Retrieval-Augmented Multi-agent Framework for Sarcasm Detection
+<h1>RAM-SD</h1>
+<h3>Retrieval-Augmented Multi-agent Framework<br>for Sarcasm Detection</h3>
 
-Code for the ACL 2026 paper by Ziyang Zhou, Ziqi Liu, Yan Wang, Yiming Lin, and Yangbin Chen.
+<p><strong>ACL 2026 &middot; Long Paper</strong></p>
 
-[Paper](https://aclanthology.org/2026.acl-long.64/) | [Dataset sources](docs/DATASETS.md) | [Paper alignment](docs/PAPER_ALIGNMENT.md) | [Validation](docs/VALIDATION.md)
+<p>
+  Ziyang Zhou<sup>*</sup>, Ziqi Liu<sup>*</sup>, Yan Wang, Yiming Lin, Yangbin Chen<br>
+  Xi'an Jiaotong-Liverpool University<br>
+  <sub><sup>*</sup> Equal contribution</sub>
+</p>
 
-RAM-SD combines balanced example retrieval, rationale generation, a meta-planner, specialized reasoning agents, and evidence synthesis. This repository reconstructs the method from the authors' original local code and the published paper, with pinned dependencies, recorded model responses, resumable evaluation, and offline replay.
+<p>
+  <a href="https://aclanthology.org/2026.acl-long.64/"><img src="https://img.shields.io/badge/ACL-2026-1f6feb?style=flat-square" alt="ACL 2026"></a>
+  <a href="https://arxiv.org/abs/2601.17002"><img src="https://img.shields.io/badge/arXiv-2601.17002-b31b1b?style=flat-square&amp;logo=arxiv" alt="arXiv 2601.17002"></a>
+  <a href=".python-version"><img src="https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python 3.12"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=flat-square" alt="License: MIT"></a>
+  <a href="https://github.com/Azhou0/RAM-SD/actions/workflows/tests.yml"><img src="https://github.com/Azhou0/RAM-SD/actions/workflows/tests.yml/badge.svg?branch=main" alt="Offline tests"></a>
+</p>
 
-**Reproduction status:** the implementation has passed 40 offline tests and a three-sample live integration check. The paper's complete benchmark scores have not been reproduced. The original processed splits, dated model snapshot, and three-run retrieval ordering have not been recovered. Implementation choices are documented in [Paper alignment](docs/PAPER_ALIGNMENT.md).
+<p>
+  <a href="https://aclanthology.org/2026.acl-long.64/"><strong>ACL Anthology</strong></a> &nbsp;&middot;&nbsp;
+  <a href="https://aclanthology.org/2026.acl-long.64.pdf"><strong>Paper PDF</strong></a> &nbsp;&middot;&nbsp;
+  <a href="https://arxiv.org/abs/2601.17002"><strong>arXiv</strong></a> &nbsp;&middot;&nbsp;
+  <a href="https://doi.org/10.18653/v1/2026.acl-long.64"><strong>DOI</strong></a> &nbsp;&middot;&nbsp;
+  <a href="CITATION.bib"><strong>BibTeX</strong></a>
+</p>
+
+<p>
+  <a href="#installation">Quick Start</a> &nbsp;&middot;&nbsp;
+  <a href="docs/DATASETS.md">Datasets</a> &nbsp;&middot;&nbsp;
+  <a href="docs/PAPER_ALIGNMENT.md">Reproducibility</a> &nbsp;&middot;&nbsp;
+  <a href="#citation">Citation</a>
+</p>
+
+</div>
+
+## Overview
+
+RAM-SD combines balanced example retrieval, rationale generation, adaptive meta-planning, and specialized agents for sarcasm detection. A meta-planner selects a reasoning plan for each input, invokes complementary agents, and synthesizes their findings into a judgment with an explanation.
+
+<p align="center">
+  <a href="assets/ram_sd_overview.png">
+    <img src="assets/ram_sd_overview.png" width="100%" alt="Figure 1: RAM-SD architecture with contextual retrieval, meta-planning, multi-view reasoning, and synthesis">
+  </a>
+</p>
+<p align="center">
+  <em>Figure 1. The four-stage RAM-SD framework, reproduced from the ACL 2026 paper. Click the figure to view the full-resolution image.</em>
+</p>
+
+- **Balanced contextual retrieval:** ground each query in sarcastic and non-sarcastic training examples with explanatory rationales.
+- **Adaptive reasoning:** select expectation-violation, knowledge-dependent, or simple-irony plans for different inputs.
+- **Interpretable execution:** retain specialist outputs, final explanations, configuration hashes, and recorded responses for replay.
+
+> **Reproduction status:** this release reconstructs the method from the authors' original local code and published prompts. It has passed 40 offline tests and a three-sample live integration check. Complete benchmark scores, original processed splits, the historical model snapshot, and three-run retrieval ordering have not been recovered. See [Paper alignment](docs/PAPER_ALIGNMENT.md) and [Validation](docs/VALIDATION.md).
 
 ## Method
 
@@ -152,6 +197,7 @@ docs/               Dataset guide, paper alignment, and validation record
 scripts/            Batch execution, small integration check, and source packaging
 tests/              Offline tests with synthetic fixtures and mock HTTP
 references/         Source-file hashes and paper provenance
+assets/             High-resolution paper figure and attribution
 ```
 
 The implemented scope covers the main method, format conversion, input audit, evaluation, replay, and aggregation. Baseline predictions can be imported for paired tests. Full baseline reruns, ablations, human explanation evaluation, and the paper's other supplementary experiments are outside the validated scope.
@@ -160,17 +206,23 @@ Create a source archive with `uv run --frozen --no-editable python scripts/build
 
 ## Citation
 
+If you use RAM-SD, please cite the ACL 2026 paper. [CITATION.bib](CITATION.bib) includes entries for both the [published version](https://aclanthology.org/2026.acl-long.64/) and the [arXiv preprint](https://arxiv.org/abs/2601.17002).
+
 ```bibtex
 @inproceedings{zhou-etal-2026-ram,
-  title = "{RAM-SD}: Retrieval-Augmented Multi-agent framework for Sarcasm Detection",
+  title = "{RAM}-{SD}: Retrieval-Augmented Multi-agent framework for Sarcasm Detection",
   author = "Zhou, Ziyang and Liu, Ziqi and Wang, Yan and Lin, Yiming and Chen, Yangbin",
   booktitle = "Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)",
+  month = jul,
   year = "2026",
+  address = "San Diego, California, United States",
+  publisher = "Association for Computational Linguistics",
   pages = "1434--1448",
+  doi = "10.18653/v1/2026.acl-long.64",
   url = "https://aclanthology.org/2026.acl-long.64/"
 }
 ```
 
 ## License
 
-The implementation is distributed under the [MIT License](LICENSE). Dataset licenses and provider terms apply separately.
+The implementation is distributed under the [MIT License](LICENSE). The paper figure is reproduced with attribution under [CC BY 4.0](assets/README.md). Dataset licenses and provider terms apply separately.

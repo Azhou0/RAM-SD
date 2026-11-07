@@ -8,6 +8,7 @@ outputs/
 data/
 dist/
 references/paper-page-*.png
+references/figure-page-*.png
 references/paper.pdf
 references/paper.txt
 .DS_Store

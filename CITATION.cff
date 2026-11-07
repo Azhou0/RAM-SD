@@ -16,3 +16,20 @@ version: 0.1.0
 license: MIT
 url: "https://aclanthology.org/2026.acl-long.64/"
 repository-code: "https://github.com/Azhou0/RAM-SD"
+preferred-citation:
+  type: conference-paper
+  title: "RAM-SD: Retrieval-Augmented Multi-agent framework for Sarcasm Detection"
+  authors:
+    - family-names: Zhou
+      given-names: Ziyang
+    - family-names: Liu
+      given-names: Ziqi
+    - family-names: Wang
+      given-names: Yan
+    - family-names: Lin
+      given-names: Yiming
+    - family-names: Chen
+      given-names: Yangbin
+  year: 2026
+  doi: "10.18653/v1/2026.acl-long.64"
+  url: "https://aclanthology.org/2026.acl-long.64/"

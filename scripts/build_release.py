@@ -6,8 +6,8 @@ from pathlib import Path
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-directories = ("src", "configs", "docs", "scripts", "tests", ".github")
-names = ("README.md", "LICENSE", "CITATION.cff", "pyproject.toml", "uv.lock", "requirements.lock.txt", ".python-version", ".gitignore", ".env.example")
+directories = ("src", "configs", "docs", "scripts", "tests", ".github", "assets")
+names = ("README.md", "LICENSE", "CITATION.cff", "CITATION.bib", "pyproject.toml", "uv.lock", "requirements.lock.txt", ".python-version", ".gitignore", ".env.example")
 files = [ROOT / name for name in names if (ROOT / name).is_file()]
 files += [p for name in directories for p in (ROOT / name).rglob("*")
           if p.is_file() and "__pycache__" not in p.parts and p.suffix not in (".pyc", ".csv", ".pkl", ".npy", ".faiss")]
